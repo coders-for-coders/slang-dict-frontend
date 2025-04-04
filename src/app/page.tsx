@@ -1,6 +1,7 @@
-
-import React from 'react';
+import React  from 'react';
 import GaaliCard from '@/components/main/gaaliCard';
+import ProfileCard from '@/components/main/profileCard';
+import TopContributors from '@/components/main/contributorsCard';
 
 const gaaliData = [
   {
@@ -41,14 +42,32 @@ const gaaliData = [
   }
 ];
 
+
+const topContributors = [
+  { id: 1, name: "User123", contributions: 47 },
+  { id: 2, name: "SlangMaster", contributions: 36},
+  { id: 3, name: "Hindi101", contributions: 29},
+  { id: 4, name: "WordWizard", contributions: 23 },
+  { id: 5, name: "Anonymous", contributions: 18 },
+];
+
+const userProfile = {
+  name: "Himanshu Saika",
+  username: "@hima_shu",
+  bio: "Slang enthusiast and web developer from Assam",
+  contributions: 12,
+  joined: "April 2023",
+  avatar: "/avatars/profile.jpg"
+};
+
 export async function generateMetadata({ searchParams: params }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const searchParams = await params
   const query = typeof searchParams.query === 'string' ? searchParams.query : undefined;
-
+  
   const gaali = query
     ? gaaliData.find(g => g.word.toLowerCase() === query.toLowerCase())
     : null;
-
+  
   return {
     title: gaali ? `${gaali.word} - Slang Dictionary` : 'Slang Dictionary',
     description: gaali ? gaali.meaning : 'Explore Hindi slang words and their meanings',
@@ -58,49 +77,66 @@ export async function generateMetadata({ searchParams: params }: { searchParams:
 export default async function Home({ searchParams: params }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const searchParams = await params
   const query = typeof searchParams.query === 'string' ? searchParams.query : undefined;
-
+  
   const gaali = query
     ? gaaliData.find(g => g.word.toLowerCase() === query.toLowerCase())
     : null;
 
+  
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-4 bg-black text-gray-200">
       <div className="max-w-7xl mx-auto">
-        {query && !gaali && (
-          <div className="text-center text-2xl text-gray-400 mt-10 p-6 border border-red-500/20 rounded-xl backdrop-blur-sm">
-            No results found for "{query}"
-          </div>
-        )}
-
-        {gaali && (
-          <GaaliCard
-            word={gaali.word}
-            meaning={gaali.meaning}
-            example={gaali.example}
-            category={gaali.category}
-            rating={gaali.rating}
-            author={gaali.author}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+          
+          {/* Left Column - User Profile */}
+          <ProfileCard
+            name={userProfile.name}
+            username={userProfile.username}
+            bio={userProfile.bio}
+            contributions={userProfile.contributions}
+            joined={userProfile.joined}
+            avatar={userProfile.avatar}
           />
-        )}
-
-        {!query && (
-          <div className="space-y-8">
-
-            <div className="grid grid-cols-3 gap-2">
-              {gaaliData.map(gaali => (
-                <GaaliCard
-                  key={gaali.id}
-                  word={gaali.word}
-                  meaning={gaali.meaning}
-                  example={gaali.example}
-                  category={gaali.category}
-                  rating={gaali.rating}
-                  author={gaali.author}
-                />
-              ))}
-            </div>
+          
+          {/* Middle Column - Slang Cards */}
+          <div className="md:col-span-6">
+            {query && !gaali && (
+              <div className="text-center text-2xl text-gray-400 mt-10 p-6 border border-red-500/20 rounded-xl backdrop-blur-sm bg-gray-800/60">
+                No results found for "{query}"
+              </div>
+            )}
+            
+            {gaali && (
+              <GaaliCard
+                word={gaali.word}
+                meaning={gaali.meaning}
+                example={gaali.example}
+                category={gaali.category}
+                rating={gaali.rating}
+                author={gaali.author}
+              />
+            )}
+            
+            {!query && (
+              <div className="space-y-4">
+                {gaaliData.map(gaali => (
+                  <GaaliCard
+                    key={gaali.id}
+                    word={gaali.word}
+                    meaning={gaali.meaning}
+                    example={gaali.example}
+                    category={gaali.category}
+                    rating={gaali.rating}
+                    author={gaali.author}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        )}
+          
+          {/* Right Column - Top Contributors */}
+          <TopContributors contributors={topContributors} />
+        </div>
       </div>
     </div>
   );
