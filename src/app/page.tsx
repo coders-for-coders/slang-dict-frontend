@@ -1,103 +1,107 @@
-import Image from "next/image";
 
-export default function Home() {
+import React from 'react';
+import GaaliCard from '@/components/main/gaaliCard';
+
+const gaaliData = [
+  {
+    id: 1,
+    word: "bakchod",
+    meaning: "A term used to describe someone who is annoying or irritating.",
+    example: "Stop being such a bakchod!",
+    category: "Casual",
+    rating: "4.5",
+    author: "Anonymous"
+  },
+  {
+    id: 2,
+    word: "chutiya",
+    meaning: "A derogatory term often used to call someone foolish or stupid.",
+    example: "Don't act like a chutiya, think before you speak.",
+    category: "Offensive",
+    rating: "3.8",
+    author: "User123"
+  },
+  {
+    id: 3,
+    word: "bewakoof",
+    meaning: "A word used to describe someone who is foolish or acting stupidly.",
+    example: "Why are you being such a bewakoof today?",
+    category: "Mild",
+    rating: "3.2",
+    author: "Hindi101"
+  },
+  {
+    id: 4,
+    word: "test",
+    meaning: "This is a test entry to demonstrate the query parameter functionality.",
+    example: "This is just a test example for demonstration.",
+    category: "Test",
+    rating: "5.0",
+    author: "System"
+  }
+];
+
+export async function generateMetadata({ searchParams: params }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const searchParams = await params
+  const query = typeof searchParams.query === 'string' ? searchParams.query : undefined;
+
+  const gaali = query
+    ? gaaliData.find(g => g.word.toLowerCase() === query.toLowerCase())
+    : null;
+
+  return {
+    title: gaali ? `${gaali.word} - Slang Dictionary` : 'Slang Dictionary',
+    description: gaali ? gaali.meaning : 'Explore Hindi slang words and their meanings',
+  }
+}
+
+export default async function Home({ searchParams: params }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const searchParams = await params
+  const query = typeof searchParams.query === 'string' ? searchParams.query : undefined;
+
+  const gaali = query
+    ? gaaliData.find(g => g.word.toLowerCase() === query.toLowerCase())
+    : null;
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen p-8">
+      <div className="max-w-7xl mx-auto">
+        {query && !gaali && (
+          <div className="text-center text-2xl text-gray-400 mt-10 p-6 border border-red-500/20 rounded-xl backdrop-blur-sm">
+            No results found for "{query}"
+          </div>
+        )}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+        {gaali && (
+          <GaaliCard
+            word={gaali.word}
+            meaning={gaali.meaning}
+            example={gaali.example}
+            category={gaali.category}
+            rating={gaali.rating}
+            author={gaali.author}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        )}
+
+        {!query && (
+          <div className="space-y-8">
+
+            <div className="grid grid-cols-3 gap-2">
+              {gaaliData.map(gaali => (
+                <GaaliCard
+                  key={gaali.id}
+                  word={gaali.word}
+                  meaning={gaali.meaning}
+                  example={gaali.example}
+                  category={gaali.category}
+                  rating={gaali.rating}
+                  author={gaali.author}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
