@@ -1,8 +1,10 @@
-import React  from 'react';
-import GaaliCard from '@/components/main/gaaliCard';
-import ProfileCard from '@/components/main/profileCard';
-import TopContributors from '@/components/main/contributorsCard';
+import React from "react";
+import { auth } from "@/auth";
+import GaaliCard from "@/components/main/gaaliCard";
+import ProfileCard from "@/components/main/profileCard";
+import TopContributors from "@/components/main/contributorsCard";
 
+// Mock data
 const gaaliData = [
   {
     id: 1,
@@ -11,7 +13,7 @@ const gaaliData = [
     example: "Stop being such a bakchod!",
     category: "Casual",
     rating: "4.5",
-    author: "Anonymous"
+    author: "Anonymous",
   },
   {
     id: 2,
@@ -20,7 +22,7 @@ const gaaliData = [
     example: "Don't act like a chutiya, think before you speak.",
     category: "Offensive",
     rating: "3.8",
-    author: "User123"
+    author: "User123",
   },
   {
     id: 3,
@@ -29,7 +31,7 @@ const gaaliData = [
     example: "Why are you being such a bewakoof today?",
     category: "Mild",
     rating: "3.2",
-    author: "Hindi101"
+    author: "Hindi101",
   },
   {
     id: 4,
@@ -38,66 +40,63 @@ const gaaliData = [
     example: "This is just a test example for demonstration.",
     category: "Test",
     rating: "5.0",
-    author: "System"
-  }
+    author: "System",
+  },
 ];
-
 
 const topContributors = [
   { id: 1, name: "User123", contributions: 47 },
-  { id: 2, name: "SlangMaster", contributions: 36},
-  { id: 3, name: "Hindi101", contributions: 29},
+  { id: 2, name: "SlangMaster", contributions: 36 },
+  { id: 3, name: "Hindi101", contributions: 29 },
   { id: 4, name: "WordWizard", contributions: 23 },
   { id: 5, name: "Anonymous", contributions: 18 },
 ];
 
-const userProfile = {
-  name: "Himanshu Saika",
-  username: "@hima_shu",
-  bio: "Slang enthusiast and web developer from Assam",
-  contributions: 12,
-  joined: "April 2023",
-  avatar: "/avatars/profile.jpg"
-};
+export default async function Home({ searchParams }: { searchParams: { query?: string } }) {
+  const session = await auth(); // Use server-side session
+  const query = searchParams.query;
 
-export async function generateMetadata({ searchParams: params }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-  const searchParams = await params
-  const query = typeof searchParams.query === 'string' ? searchParams.query : undefined;
-  
-  const gaali = query
-    ? gaaliData.find(g => g.word.toLowerCase() === query.toLowerCase())
-    : null;
-  
-  return {
-    title: gaali ? `${gaali.word} - Slang Dictionary` : 'Slang Dictionary',
-    description: gaali ? gaali.meaning : 'Explore Hindi slang words and their meanings',
-  }
-}
 
-export default async function Home({ searchParams: params }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-  const searchParams = await params
-  const query = typeof searchParams.query === 'string' ? searchParams.query : undefined;
-  
   const gaali = query
-    ? gaaliData.find(g => g.word.toLowerCase() === query.toLowerCase())
+    ? gaaliData.find((g) => g.word.toLowerCase() === query.toLowerCase())
     : null;
 
-  
+  const defaultProfileData = {
+    name: "Guest",
+    username: "Not Signed In",
+    bio: "Sign in to contribute and view your profile.",
+    contributions: 0,
+    joined: "N/A",
+    avatar: "/default-avatar.png", 
+  };
+
+  // Profile data for authenticated users
+  const userProfileData = session
+    ? {
+        name: session.user?.name || "User",
+        username: session.user?.email || "user@example.com",
+        bio: "Active contributor to the Slang Dictionary.",
+        contributions: 10, 
+        joined: "January 2023", 
+        avatar: session.user?.image || "/default-avatar.png", 
+      }
+    : defaultProfileData;
+
   return (
     <div className="min-h-screen p-4 bg-black text-gray-200">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-          
           {/* Left Column - User Profile */}
-          <ProfileCard
-            name={userProfile.name}
-            username={userProfile.username}
-            bio={userProfile.bio}
-            contributions={userProfile.contributions}
-            joined={userProfile.joined}
-            avatar={userProfile.avatar}
-          />
-          
+          <div className="md:col-span-3">
+            {session ? (
+              <ProfileCard {...userProfileData} />
+            ) : (
+              <div className="p-4 rounded-xl shadow-md border border-gray-700/50 backdrop-blur-sm text-center">
+                <p className="text-gray-400">Please Log in to contribute slangs.</p>
+              </div>
+            )}
+          </div>
+
           {/* Middle Column - Slang Cards */}
           <div className="md:col-span-6">
             {query && !gaali && (
@@ -105,7 +104,7 @@ export default async function Home({ searchParams: params }: { searchParams: Pro
                 No results found for "{query}"
               </div>
             )}
-            
+
             {gaali && (
               <GaaliCard
                 word={gaali.word}
@@ -116,10 +115,10 @@ export default async function Home({ searchParams: params }: { searchParams: Pro
                 author={gaali.author}
               />
             )}
-            
+
             {!query && (
               <div className="space-y-4">
-                {gaaliData.map(gaali => (
+                {gaaliData.map((gaali) => (
                   <GaaliCard
                     key={gaali.id}
                     word={gaali.word}
@@ -133,7 +132,7 @@ export default async function Home({ searchParams: params }: { searchParams: Pro
               </div>
             )}
           </div>
-          
+
           {/* Right Column - Top Contributors */}
           <TopContributors contributors={topContributors} />
         </div>
