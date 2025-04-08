@@ -3,9 +3,21 @@ import { auth } from "@/auth";
 import GaaliCard from "@/components/main/gaaliCard";
 import ProfileCard from "@/components/main/profileCard";
 import TopContributors from "@/components/main/contributorsCard";
+import Pagination from "@/components/main/pagination";
 
+const ITEMS_PER_PAGE = 3;
 // Mock data
-const gaaliData = [
+type Gaali = {
+  id: number;
+  word: string;
+  meaning: string;
+  example: string;
+  category: string;
+  rating: string;
+  author: string;
+};
+
+const gaaliData: Gaali[] = [
   {
     id: 1,
     word: "bakchod",
@@ -42,6 +54,42 @@ const gaaliData = [
     rating: "5.0",
     author: "System",
   },
+  {
+    id: 5,
+    word: "test",
+    meaning: "This is a test entry to demonstrate the query parameter functionality.",
+    example: "This is just a test example for demonstration.",
+    category: "Test",
+    rating: "5.0",
+    author: "System",
+  },
+  {
+    id: 6,
+    word: "test",
+    meaning: "This is a test entry to demonstrate the query parameter functionality.",
+    example: "This is just a test example for demonstration.",
+    category: "Test",
+    rating: "5.0",
+    author: "System",
+  },
+  {
+    id: 7,
+    word: "test",
+    meaning: "This is a test entry to demonstrate the query parameter functionality.",
+    example: "This is just a test example for demonstration.",
+    category: "Test",
+    rating: "5.0",
+    author: "System",
+  },
+  {
+    id: 8,
+    word: "test",
+    meaning: "This is a test entry to demonstrate the query parameter functionality.",
+    example: "This is just a test example for demonstration.",
+    category: "Test",
+    rating: "5.0",
+    author: "System",
+  },
 ];
 
 const topContributors = [
@@ -52,14 +100,22 @@ const topContributors = [
   { id: 5, name: "Anonymous", contributions: 18 },
 ];
 
-export default async function Home({ searchParams }: { searchParams: { query?: string } }) {
+export default async function Home({ searchParams }: { searchParams: { query?: string,page?: string } }) {
   const session = await auth(); // Use server-side session
-  const query = searchParams.query;
+  const params = await searchParams; // Get the search parameters from the URL
+  const query = params.query;
+  const page = parseInt(searchParams.page || "1", 10);
 
 
   const gaali = query
     ? gaaliData.find((g) => g.word.toLowerCase() === query.toLowerCase())
     : null;
+
+  const paginatedData = !query
+    ? gaaliData.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+    : [];
+
+  const totalPages = Math.ceil(gaaliData.length / ITEMS_PER_PAGE);
 
   const defaultProfileData = {
     name: "Guest",
@@ -106,32 +162,21 @@ export default async function Home({ searchParams }: { searchParams: { query?: s
             )}
 
             {gaali && (
-              <GaaliCard
-                word={gaali.word}
-                meaning={gaali.meaning}
-                example={gaali.example}
-                category={gaali.category}
-                rating={gaali.rating}
-                author={gaali.author}
-              />
+              <GaaliCard {...gaali}  />
             )}
 
             {!query && (
-              <div className="space-y-4">
-                {gaaliData.map((gaali) => (
-                  <GaaliCard
-                    key={gaali.id}
-                    word={gaali.word}
-                    meaning={gaali.meaning}
-                    example={gaali.example}
-                    category={gaali.category}
-                    rating={gaali.rating}
-                    author={gaali.author}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="space-y-4">
+                  {paginatedData.map((gaali) => (
+                    <GaaliCard key={gaali.id} {...gaali}  />
+                  ))}
+                </div>
+                <Pagination currentPage={page} totalPages={totalPages} />
+              </>
             )}
           </div>
+
 
           {/* Right Column - Top Contributors */}
           <TopContributors contributors={topContributors} />
